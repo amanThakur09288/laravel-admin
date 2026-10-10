@@ -1,37 +1,61 @@
 export const getApiErrorMessage = (error) => {
-    // Laravel validation error
-    if (error.response?.data?.errors) {
-        const errors =
-            error.response.data.errors;
+  const responseData = error.response?.data;
 
-        const firstField = Object.keys(errors)[0];
+  /*
+    |--------------------------------------------------------------------------
+    | Laravel validation errors
+    |--------------------------------------------------------------------------
+    */
 
-        if (
-            firstField &&
-            errors[firstField]?.length
-        ) {
-            return errors[firstField][0];
-        }
+  if (responseData?.errors) {
+    const errors = responseData.errors;
+
+    const firstField = Object.keys(errors)[0];
+
+    if (firstField) {
+      const messages = errors[firstField];
+
+      if (Array.isArray(messages) && messages.length > 0) {
+        return messages[0];
+      }
     }
+  }
 
-    // Laravel normal message
-    if (error.response?.data?.message) {
-        return error.response.data.message;
-    }
+  /*
+    |--------------------------------------------------------------------------
+    | Normal Laravel message
+    |--------------------------------------------------------------------------
+    */
 
-    // Server responded but something went wrong
-    if (error.response) {
-        return "Something went wrong on the server.";
-    }
+  if (responseData?.message) {
+    return responseData.message;
+  }
 
-    // Request was sent but server didn't respond
-    if (error.request) {
-        return "Unable to connect to the server.";
-    }
+  /*
+    |--------------------------------------------------------------------------
+    | Server response
+    |--------------------------------------------------------------------------
+    */
 
-    // Axios/request configuration error
-    return (
-        error.message ||
-        "Something went wrong."
-    );
+  if (error.response) {
+    return "Something went wrong on the server.";
+  }
+
+  /*
+    |--------------------------------------------------------------------------
+    | Request sent but server didn't respond
+    |--------------------------------------------------------------------------
+    */
+
+  if (error.request) {
+    return "Unable to connect to the server.";
+  }
+
+  /*
+    |--------------------------------------------------------------------------
+    | JavaScript / Axios error
+    |--------------------------------------------------------------------------
+    */
+
+  return error.message || "Something went wrong.";
 };
