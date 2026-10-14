@@ -13,6 +13,10 @@ import EditBatch from "./pages/batches/EditBatch";
 import BatchDetails from "./pages/batches/BatchDetails";
 import ContactMessages from "./pages/contacts/ContactMessages";
 import ContactMessageDetails from "./pages/contacts/ContactMessageDetails";
+import Courses from "./pages/Courses";
+import CreateCourse from "./pages/CreateCourse";
+import EditCourse from "./pages/EditCourse";
+import CourseDetails from "./pages/CourseDetails";
 
 export default function App() {
   return (
@@ -29,7 +33,14 @@ export default function App() {
           <Route path="/batches/:id" element={<BatchDetails />} />
           <Route path="/batches/:id/edit" element={<EditBatch />} />
           <Route path="contact-messages" element={<ContactMessages />} />
-          <Route path="contact-messages/:id" element={<ContactMessageDetails />} />
+          <Route
+            path="contact-messages/:id"
+            element={<ContactMessageDetails />}
+          />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/courses/create" element={<CreateCourse />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
+          <Route path="/courses/:id/edit" element={<EditCourse />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
