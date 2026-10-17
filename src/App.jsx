@@ -17,11 +17,17 @@ import Courses from "./pages/Courses";
 import CreateCourse from "./pages/CreateCourse";
 import EditCourse from "./pages/EditCourse";
 import CourseDetails from "./pages/CourseDetails";
+import Services from "./pages/Services";
+import CreateService from "./pages/CreateService";
+import EditService from "./pages/EditService";
+import Login from "./pages/Login";
+import ServiceDetails from "./pages/ServiceDetails";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route element={<AdminLayout />}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/products" element={<Products />} />
@@ -41,6 +47,10 @@ export default function App() {
           <Route path="/courses/create" element={<CreateCourse />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/courses/:id/edit" element={<EditCourse />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/create" element={<CreateService />} />
+          <Route path="/services/:id/edit" element={<EditService />} />
+          <Route path="/services/:id" element={<ServiceDetails />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -1,7 +1,17 @@
 import axios from "axios";
+import { store } from "../redux/store";
+import { clearUser } from "../redux/slices/authSlice";
+import { navigateToLogin } from "../utils/navigation";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+
+  withCredentials: true,
+  withXSRFToken: true,
+
+  xsrfCookieName: "XSRF-TOKEN",
+  xsrfHeaderName: "X-XSRF-TOKEN",
+
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -27,8 +37,21 @@ api.interceptors.response.use(
 
     return response;
   },
+
   (error) => {
     console.error("API Error:", error.response?.data);
+
+    if (error.response?.status === 401) {
+      console.log("Session expired. Logging out...");
+
+      // Clear Redux authentication
+      store.dispatch(clearUser());
+
+      // React Router navigation without page refresh
+      if (window.location.pathname !== "/login") {
+        navigateToLogin();
+      }
+    }
 
     return Promise.reject(error);
   },

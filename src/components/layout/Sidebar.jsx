@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-
+import LogoutButton from "../common/LogoutButton";
 export default function Sidebar({ isOpen, onClose }) {
   const links = [
     { name: "Dashboard", path: "/", icon: "📊" },
     { name: "Products", path: "/products", icon: "📦" },
     { name: "Upcoming Batches", path: "/batches", icon: "📅" },
-    { name: "Courses", path: "/courses", icon: "📅" },
+    { name: "Courses", path: "/courses", icon: "📚" },
+    { name: "Services", path: "/services", icon: "🛠️" },
     { name: "Contact Messages", path: "/contact-messages", icon: "✉️" },
   ];
 
@@ -52,6 +53,9 @@ export default function Sidebar({ isOpen, onClose }) {
             </NavLink>
           ))}
         </nav>
+        <div className="mt-auto border-t border-gray-200 p-4 dark:border-gray-800">
+          <LogoutButton />
+        </div>
       </aside>
     </>
   );

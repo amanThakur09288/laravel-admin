@@ -5,6 +5,8 @@ import themeReducer from "./slices/themeSlice";
 import batchReducer from "./slices/batchSlice";
 import contactMessageReducer from "./slices/contactMessageSlice";
 import courseReducer from "./slices/courseSlice";
+import authReducer from "./slices/authSlice";
+import serviceReducer from "./slices/serviceSlice";
 
 export const store = configureStore({
   reducer: {
@@ -13,5 +15,7 @@ export const store = configureStore({
     batches: batchReducer,
     contactMessages: contactMessageReducer,
     courses: courseReducer,
+    auth: authReducer,
+    services: serviceReducer,
   },
 });
