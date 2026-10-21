@@ -22,6 +22,14 @@ import CreateService from "./pages/CreateService";
 import EditService from "./pages/EditService";
 import Login from "./pages/Login";
 import ServiceDetails from "./pages/ServiceDetails";
+import Questions from "./pages/Questions";
+import CreateQuestion from "./pages/CreateQuestion";
+import EditQuestion from "./pages/EditQuestion";
+import EditQuiz from "./pages/EditQuiz";
+import QuizDetails from "./pages/QuizDetails";
+
+import Quizzes from "./pages/Quizzes";
+import CreateQuiz from "./pages/CreateQuiz";
 
 export default function App() {
   return (
@@ -51,6 +59,14 @@ export default function App() {
           <Route path="/services/create" element={<CreateService />} />
           <Route path="/services/:id/edit" element={<EditService />} />
           <Route path="/services/:id" element={<ServiceDetails />} />
+
+          <Route path="/questions" element={<Questions />} />
+          <Route path="/questions/create" element={<CreateQuestion />} />
+          <Route path="/questions/:id/edit" element={<EditQuestion />} />
+          <Route path="/quizzes/:id/edit" element={<EditQuiz />} />
+          <Route path="/quizzes/:id" element={<QuizDetails />} />
+          <Route path="/quizzes" element={<Quizzes />} />
+          <Route path="/quizzes/create" element={<CreateQuiz />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
