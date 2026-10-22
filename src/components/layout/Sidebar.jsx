@@ -6,6 +6,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { name: "Products", path: "/products", icon: "📦" },
     { name: "Upcoming Batches", path: "/batches", icon: "📅" },
     { name: "Courses", path: "/courses", icon: "📚" },
+    { name: "Quizzes", path: "/quizzes", icon: "📝" },
     { name: "Services", path: "/services", icon: "🛠️" },
     { name: "Contact Messages", path: "/contact-messages", icon: "✉️" },
   ];
