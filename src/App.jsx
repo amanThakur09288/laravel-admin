@@ -26,6 +26,8 @@ import Quizzes from "./pages/Quizzes";
 import CreateQuiz from "./pages/CreateQuiz";
 import EditQuiz from "./pages/EditQuiz";
 import QuizDetails from "./pages/QuizDetails";
+import QuizResults from "./pages/QuizResults";
+import QuizResultDetails from "./pages/QuizResultDetails";
 
 export default function App() {
   return (
@@ -60,6 +62,9 @@ export default function App() {
           <Route path="/quizzes/create" element={<CreateQuiz />} />
           <Route path="/quizzes/:id" element={<QuizDetails />} />
           <Route path="/quizzes/:id/edit" element={<EditQuiz />} />
+
+          <Route path="/quiz-results" element={<QuizResults />} />
+          <Route path="/quiz-results/:attemptId" element={<QuizResultDetails />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

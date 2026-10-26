@@ -8,6 +8,7 @@ import courseReducer from "./slices/courseSlice";
 import authReducer from "./slices/authSlice";
 import serviceReducer from "./slices/serviceSlice";
 import quizReducer from "./slices/quizSlice";
+import quizResultReducer from "./slices/quizResultSlice";
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
     auth: authReducer,
     services: serviceReducer,
     quiz: quizReducer,
+    quizResult: quizResultReducer,
 
   },
 });

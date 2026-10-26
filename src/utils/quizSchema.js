@@ -221,25 +221,14 @@
 // export { optionSchema, questionSchema };
 import { z } from "zod";
 
-/*
-|--------------------------------------------------------------------------
-| Default Option
-|--------------------------------------------------------------------------
-*/
-
 export const defaultQuizOption = {
   option_text: "",
   is_correct: false,
 };
 
-/*
-|--------------------------------------------------------------------------
-| Default Question
-|--------------------------------------------------------------------------
-*/
-
 export const defaultQuizQuestion = {
   question_text: "",
+  question_image: null,
   type: "single_select",
   marks: 1,
   explanation: "",
@@ -264,32 +253,21 @@ export const defaultQuizQuestion = {
 
 export const defaultQuizValues = {
   batch_id: undefined,
-
   title: "",
-
   description: "",
-
   duration_minutes: 30,
-
   passing_marks: 0,
-
   attempts_allowed: 1,
-
   shuffle_questions: false,
-
   shuffle_options: false,
-
   auto_submit: true,
-
   show_result: true,
-
   show_correct_answers: false,
-
   status: "draft",
-
   questions: [
     {
       question_text: "",
+      question_image: null,
       type: "single_select",
       marks: 1,
       explanation: "",
@@ -339,6 +317,8 @@ export const questionSchema = z
       .trim()
       .min(1, "Question is required.")
       .max(5000, "Question cannot exceed 5000 characters."),
+
+    question_image: z.any().nullable().optional(),
 
     type: z.enum(["single_select", "multi_select"]),
 
@@ -497,22 +477,10 @@ export const quizSchema = z
       .max(200, "Maximum 200 questions are allowed."),
   })
   .superRefine((quiz, ctx) => {
-    /*
-    |--------------------------------------------------------------------------
-    | Calculate total marks
-    |--------------------------------------------------------------------------
-    */
-
     const totalMarks = quiz.questions.reduce(
       (total, question) => total + question.marks,
       0,
     );
-
-    /*
-    |--------------------------------------------------------------------------
-    | Passing marks cannot exceed total marks
-    |--------------------------------------------------------------------------
-    */
 
     if (quiz.passing_marks > totalMarks) {
       ctx.addIssue({
@@ -521,12 +489,6 @@ export const quizSchema = z
         message: `Passing marks cannot exceed total marks (${totalMarks}).`,
       });
     }
-
-    /*
-    |--------------------------------------------------------------------------
-    | Correct answers require result
-    |--------------------------------------------------------------------------
-    */
 
     if (quiz.show_correct_answers === true && quiz.show_result === false) {
       ctx.addIssue({
