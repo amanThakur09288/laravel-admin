@@ -28,6 +28,10 @@ import EditQuiz from "./pages/EditQuiz";
 import QuizDetails from "./pages/QuizDetails";
 import QuizResults from "./pages/QuizResults";
 import QuizResultDetails from "./pages/QuizResultDetails";
+import VideoSections from "./pages/VideoSections";
+import CreateVideoSection from "./pages/CreateVideoSection";
+import EditVideoSection from "./pages/EditVideoSection";
+import VideoSectionLessons from "./pages/VideoSectionLessons";
 
 export default function App() {
   return (
@@ -64,7 +68,24 @@ export default function App() {
           <Route path="/quizzes/:id/edit" element={<EditQuiz />} />
 
           <Route path="/quiz-results" element={<QuizResults />} />
-          <Route path="/quiz-results/:attemptId" element={<QuizResultDetails />} />
+          <Route
+            path="/quiz-results/:attemptId"
+            element={<QuizResultDetails />}
+          />
+
+          <Route path="/video-sections" element={<VideoSections />} />
+          <Route
+            path="/video-sections/create"
+            element={<CreateVideoSection />}
+          />
+          <Route
+            path="/video-sections/:id/edit"
+            element={<EditVideoSection />}
+          />
+          <Route
+            path="/video-sections/:id/lessons"
+            element={<VideoSectionLessons />}
+          />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

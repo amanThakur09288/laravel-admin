@@ -20,6 +20,8 @@
 
 //   const options = watch(`questions.${questionIndex}.options`) || [];
 
+//   const questionImage = watch(`questions.${questionIndex}.question_image`);
+
 //   /*
 //   |--------------------------------------------------------------------------
 //   | Add option
@@ -61,6 +63,7 @@
 //      *
 //      * This prevents stale/invalid correct-answer state.
 //      */
+
 //     if (
 //       questionType === "single_select" &&
 //       removedOption?.is_correct === true
@@ -157,6 +160,69 @@
 //     });
 //   };
 
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Question Image
+//   |--------------------------------------------------------------------------
+//   */
+
+//   const handleQuestionImageChange = (event) => {
+//     const file = event.target.files?.[0];
+
+//     if (!file) {
+//       return;
+//     }
+
+//     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+
+//     const maxSize = 5 * 1024 * 1024;
+
+//     if (!allowedTypes.includes(file.type)) {
+//       toast.error("Only JPG, JPEG, PNG and WEBP images are allowed.");
+
+//       event.target.value = "";
+
+//       return;
+//     }
+
+//     if (file.size > maxSize) {
+//       toast.error("Image size cannot exceed 5MB.");
+
+//       event.target.value = "";
+
+//       return;
+//     }
+
+//     setValue(`questions.${questionIndex}.question_image`, file, {
+//       shouldValidate: true,
+//       shouldDirty: true,
+//     });
+//   };
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Remove Question Image
+//   |--------------------------------------------------------------------------
+//   */
+
+//   const handleRemoveQuestionImage = () => {
+//     setValue(`questions.${questionIndex}.question_image`, null, {
+//       shouldValidate: true,
+//       shouldDirty: true,
+//     });
+//   };
+
+//   /*
+//   |--------------------------------------------------------------------------
+//   | Image Preview
+//   |--------------------------------------------------------------------------
+//   */
+
+//   const imagePreview =
+//     questionImage instanceof File
+//       ? URL.createObjectURL(questionImage)
+//       : questionImage || null;
+
 //   return (
 //     <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
 //       {/* ---------------------------------------------------------------- */}
@@ -203,6 +269,52 @@
 //           <p className="mt-1 text-sm text-red-600">
 //             {errors.question_text.message}
 //           </p>
+//         )}
+//       </div>
+
+//       {/* ---------------------------------------------------------------- */}
+//       {/* Question Image */}
+//       {/* ---------------------------------------------------------------- */}
+
+//       <div className="mb-6">
+//         <label className="mb-2 block text-sm font-medium text-gray-700">
+//           Question Image
+//           <span className="ml-1 text-gray-400">(Optional)</span>
+//         </label>
+
+//         <input
+//           type="file"
+//           accept="image/jpeg,image/jpg,image/png,image/webp"
+//           onChange={handleQuestionImageChange}
+//           className="block w-full cursor-pointer rounded-lg border border-gray-300 bg-white text-sm text-gray-700 file:mr-4 file:cursor-pointer file:border-0 file:bg-gray-100 file:px-4 file:py-3 file:text-sm file:font-medium file:text-gray-700 hover:file:bg-gray-200"
+//         />
+
+//         <p className="mt-2 text-xs text-gray-500">
+//           Supported: JPG, JPEG, PNG, WEBP. Maximum size: 5MB.
+//         </p>
+
+//         {imagePreview && (
+//           <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+//             <div className="mb-3 flex items-center justify-between">
+//               <p className="text-sm font-medium text-gray-700">Image Preview</p>
+
+//               <button
+//                 type="button"
+//                 onClick={handleRemoveQuestionImage}
+//                 className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+//               >
+//                 Remove Image
+//               </button>
+//             </div>
+
+//             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+//               <img
+//                 src={imagePreview}
+//                 alt={`Question ${questionIndex + 1}`}
+//                 className="max-h-[350px] w-full object-contain"
+//               />
+//             </div>
+//           </div>
 //         )}
 //       </div>
 
@@ -416,7 +528,8 @@
 
 // export default QuizQuestion;
 
-import { Controller, useFieldArray } from "react-hook-form";
+import { useFieldArray } from "react-hook-form";
+import toast from "react-hot-toast";
 
 function QuizQuestion({
   control,
@@ -476,10 +589,9 @@ function QuizQuestion({
     remove(optionIndex);
 
     /*
-     * If we remove the only correct option in a Single Select
-     * question, the remaining options are reset to false.
-     *
-     * This prevents stale/invalid correct-answer state.
+     * If we remove the only correct option
+     * in a Single Select question,
+     * reset remaining options.
      */
 
     if (
@@ -506,9 +618,6 @@ function QuizQuestion({
   |--------------------------------------------------------------------------
   | Single Select
   |--------------------------------------------------------------------------
-  |
-  | Exactly ONE option can be correct.
-  |
   */
 
   const handleSingleCorrectOption = (selectedIndex) => {
@@ -531,9 +640,6 @@ function QuizQuestion({
   |--------------------------------------------------------------------------
   | Multi Select
   |--------------------------------------------------------------------------
-  |
-  | Multiple options can be correct.
-  |
   */
 
   const handleMultiCorrectOption = (optionIndex, checked) => {
@@ -551,10 +657,6 @@ function QuizQuestion({
   |--------------------------------------------------------------------------
   | Change question type
   |--------------------------------------------------------------------------
-  |
-  | When switching between Single Select and Multi Select,
-  | reset correct answers so old state cannot create confusion.
-  |
   */
 
   const handleQuestionTypeChange = (type) => {
@@ -818,14 +920,20 @@ function QuizQuestion({
           </button>
         </div>
 
-        {errors?.options?.message && (
+        {/* {errors?.options?.message && (
           <p className="mb-3 text-sm font-medium text-red-600">
             {errors.options.message}
+          </p>
+        )} */}
+
+        {(errors?.options?.root?.message || errors?.options?.message) && (
+          <p className="mb-3 text-sm font-medium text-red-600">
+            {errors?.options?.root?.message || errors?.options?.message}
           </p>
         )}
 
         <div className="space-y-3">
-          {fields.map((field, optionIndex) => {
+          {fields?.map((field, optionIndex) => {
             const optionError = errors?.options?.[optionIndex];
 
             const isCorrect = options?.[optionIndex]?.is_correct === true;
@@ -842,9 +950,9 @@ function QuizQuestion({
                 }`}
               >
                 <div className="flex items-start gap-3">
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
                   {/* Correct Answer Control */}
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
 
                   <div className="pt-3">
                     {questionType === "single_select" ? (
@@ -870,9 +978,9 @@ function QuizQuestion({
                     )}
                   </div>
 
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
                   {/* Option Input */}
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
 
                   <div className="flex-1">
                     <input
@@ -895,9 +1003,9 @@ function QuizQuestion({
                     )}
                   </div>
 
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
                   {/* Remove Option */}
-                  {/* ---------------------------------------------------- */}
+                  {/* -------------------------------------------------- */}
 
                   <button
                     type="button"

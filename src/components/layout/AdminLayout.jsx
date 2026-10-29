@@ -7,7 +7,6 @@ import Header from "./Header";
 
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const theme = useSelector((state) => state.theme.mode);
 
   useEffect(() => {
@@ -17,10 +16,8 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-950">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
       <div className="lg:ml-64">
         <Header onMenuClick={() => setSidebarOpen(true)} />
-
         <main className="p-4 sm:p-6">
           <Outlet />
         </main>

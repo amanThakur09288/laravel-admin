@@ -24,6 +24,11 @@ export default function Sidebar({ isOpen, onClose }) {
       icon: "📚",
     },
     {
+      name: "Video Sections",
+      path: "/video-sections",
+      icon: "🎬",
+    },
+    {
       name: "Quizzes",
       path: "/quizzes",
       icon: "📝",

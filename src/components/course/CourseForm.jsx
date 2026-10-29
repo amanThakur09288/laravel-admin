@@ -1,640 +1,3 @@
-// import { useEffect } from "react";
-// import { useFieldArray, useForm } from "react-hook-form";
-// import { zodResolver } from "@hookform/resolvers/zod";
-
-// import { courseSchema } from "../../utils/courseSchema";
-// import Button from "../common/Button";
-
-// const defaultValues = {
-//   course_name: "",
-//   category: "",
-//   level: "Beginner",
-//   short_description: "",
-//   course_description: "",
-//   duration: "",
-//   total_hours: "",
-//   learning_outcomes: [],
-//   curriculum: [],
-//   prerequisites: [],
-//   who_should_join: [],
-//   course_features: [],
-//   faqs: [],
-//   status: "Active",
-// };
-
-// function TextInput({
-//   label,
-//   register,
-//   name,
-//   error,
-//   type = "text",
-//   placeholder = "",
-// }) {
-//   return (
-//     <div>
-//       <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-//         {label}
-//       </label>
-
-//       <input
-//         type={type}
-//         placeholder={placeholder}
-//         {...register(name)}
-//         className={`w-full rounded-lg border px-4 py-2.5 text-sm outline-none transition dark:bg-gray-900 dark:text-white ${
-//           error
-//             ? "border-red-500"
-//             : "border-gray-300 focus:border-blue-500 dark:border-gray-700"
-//         }`}
-//       />
-
-//       {error && <p className="mt-1 text-xs text-red-500">{error.message}</p>}
-//     </div>
-//   );
-// }
-
-// function TextArea({
-//   label,
-//   register,
-//   name,
-//   error,
-//   rows = 4,
-//   placeholder = "",
-// }) {
-//   return (
-//     <div>
-//       <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-//         {label}
-//       </label>
-
-//       <textarea
-//         rows={rows}
-//         placeholder={placeholder}
-//         {...register(name)}
-//         className={`w-full resize-y rounded-lg border px-4 py-3 text-sm outline-none transition dark:bg-gray-900 dark:text-white ${
-//           error
-//             ? "border-red-500"
-//             : "border-gray-300 focus:border-blue-500 dark:border-gray-700"
-//         }`}
-//       />
-
-//       {error && <p className="mt-1 text-xs text-red-500">{error.message}</p>}
-//     </div>
-//   );
-// }
-
-// export default function CourseForm({
-//   initialData = null,
-//   onSubmit,
-//   submitting = false,
-//   submitText = "Save Course",
-// }) {
-//   const {
-//     register,
-//     control,
-//     handleSubmit,
-//     reset,
-//     formState: { errors },
-//   } = useForm({
-//     resolver: zodResolver(courseSchema),
-//     defaultValues,
-//   });
-
-//   const {
-//     fields: outcomeFields,
-//     append: appendOutcome,
-//     remove: removeOutcome,
-//   } = useFieldArray({
-//     control,
-//     name: "learning_outcomes",
-//   });
-
-//   const {
-//     fields: curriculumFields,
-//     append: appendCurriculum,
-//     remove: removeCurriculum,
-//   } = useFieldArray({
-//     control,
-//     name: "curriculum",
-//   });
-
-//   const {
-//     fields: prerequisiteFields,
-//     append: appendPrerequisite,
-//     remove: removePrerequisite,
-//   } = useFieldArray({
-//     control,
-//     name: "prerequisites",
-//   });
-
-//   const {
-//     fields: whoFields,
-//     append: appendWho,
-//     remove: removeWho,
-//   } = useFieldArray({
-//     control,
-//     name: "who_should_join",
-//   });
-
-//   const {
-//     fields: featureFields,
-//     append: appendFeature,
-//     remove: removeFeature,
-//   } = useFieldArray({
-//     control,
-//     name: "course_features",
-//   });
-
-//   const {
-//     fields: faqFields,
-//     append: appendFaq,
-//     remove: removeFaq,
-//   } = useFieldArray({
-//     control,
-//     name: "faqs",
-//   });
-
-//   useEffect(() => {
-//     if (!initialData) {
-//       reset(defaultValues);
-//       return;
-//     }
-
-//     reset({
-//       ...defaultValues,
-//       ...initialData,
-
-//       total_hours: initialData.total_hours ?? "",
-
-//       learning_outcomes: Array.isArray(initialData.learning_outcomes)
-//         ? initialData.learning_outcomes
-//         : [],
-
-//       curriculum: Array.isArray(initialData.curriculum)
-//         ? initialData.curriculum
-//         : [],
-
-//       prerequisites: Array.isArray(initialData.prerequisites)
-//         ? initialData.prerequisites
-//         : [],
-
-//       who_should_join: Array.isArray(initialData.who_should_join)
-//         ? initialData.who_should_join
-//         : [],
-
-//       course_features: Array.isArray(initialData.course_features)
-//         ? initialData.course_features
-//         : [],
-
-//       faqs: Array.isArray(initialData.faqs) ? initialData.faqs : [],
-//     });
-//   }, [initialData, reset]);
-
-//   const submit = (data) => {
-//     const payload = {
-//       ...data,
-//       total_hours: data.total_hours === "" ? null : Number(data.total_hours),
-//     };
-
-//     onSubmit(payload);
-//   };
-
-//   return (
-//     <form onSubmit={handleSubmit(submit)} className="space-y-8">
-//       {/* Basic Information */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-6">
-//           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//             Basic Information
-//           </h2>
-
-//           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-//             Enter the basic information about the course.
-//           </p>
-//         </div>
-
-//         <div className="grid gap-5 md:grid-cols-2">
-//           <TextInput
-//             label="Course Name"
-//             name="course_name"
-//             register={register}
-//             error={errors.course_name}
-//             placeholder="e.g. Full Stack Web Development"
-//           />
-
-//           <TextInput
-//             label="Category"
-//             name="category"
-//             register={register}
-//             error={errors.category}
-//             placeholder="e.g. Web Development"
-//           />
-
-//           <div>
-//             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-//               Level
-//             </label>
-
-//             <select
-//               {...register("level")}
-//               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//             >
-//               <option value="Beginner">Beginner</option>
-
-//               <option value="Intermediate">Intermediate</option>
-
-//               <option value="Advanced">Advanced</option>
-//             </select>
-
-//             {errors.level && (
-//               <p className="mt-1 text-xs text-red-500">
-//                 {errors.level.message}
-//               </p>
-//             )}
-//           </div>
-
-//           <TextInput
-//             label="Duration"
-//             name="duration"
-//             register={register}
-//             error={errors.duration}
-//             placeholder="e.g. 4 Months"
-//           />
-
-//           <TextInput
-//             label="Total Hours"
-//             name="total_hours"
-//             type="number"
-//             register={register}
-//             error={errors.total_hours}
-//             placeholder="e.g. 120"
-//           />
-
-//           <div>
-//             <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-//               Status
-//             </label>
-
-//             <select
-//               {...register("status")}
-//               className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//             >
-//               <option value="Active">Active</option>
-
-//               <option value="Inactive">Inactive</option>
-//             </select>
-//           </div>
-//         </div>
-
-//         <div className="mt-5 space-y-5">
-//           <TextArea
-//             label="Short Description"
-//             name="short_description"
-//             register={register}
-//             error={errors.short_description}
-//             rows={3}
-//             placeholder="Short description of the course..."
-//           />
-
-//           <TextArea
-//             label="Course Description"
-//             name="course_description"
-//             register={register}
-//             error={errors.course_description}
-//             rows={6}
-//             placeholder="Detailed description of the course..."
-//           />
-//         </div>
-//       </section>
-
-//       {/* Learning Outcomes */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               Learning Outcomes
-//             </h2>
-
-//             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-//               What will students learn?
-//             </p>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() => appendOutcome("")}
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add
-//           </button>
-//         </div>
-
-//         <div className="space-y-3">
-//           {outcomeFields.map((field, index) => (
-//             <div key={field.id} className="flex gap-3">
-//               <input
-//                 {...register(`learning_outcomes.${index}`)}
-//                 placeholder="e.g. Build responsive React applications"
-//                 className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//               />
-
-//               <button
-//                 type="button"
-//                 onClick={() => removeOutcome(index)}
-//                 className="rounded-lg px-3 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
-//               >
-//                 Remove
-//               </button>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* Curriculum */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               Curriculum
-//             </h2>
-
-//             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-//               Add course modules and topics.
-//             </p>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() =>
-//               appendCurriculum({
-//                 title: "",
-//                 description: "",
-//                 topics: [],
-//               })
-//             }
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add Module
-//           </button>
-//         </div>
-
-//         <div className="space-y-5">
-//           {curriculumFields.map((field, index) => (
-//             <div
-//               key={field.id}
-//               className="rounded-lg border border-gray-200 p-5 dark:border-gray-700"
-//             >
-//               <div className="mb-4 flex items-center justify-between">
-//                 <h3 className="font-medium text-gray-900 dark:text-white">
-//                   Module {index + 1}
-//                 </h3>
-
-//                 <button
-//                   type="button"
-//                   onClick={() => removeCurriculum(index)}
-//                   className="text-sm text-red-600 hover:underline dark:text-red-400"
-//                 >
-//                   Remove Module
-//                 </button>
-//               </div>
-
-//               <div className="space-y-4">
-//                 <input
-//                   {...register(`curriculum.${index}.title`)}
-//                   placeholder="Module title"
-//                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//                 />
-
-//                 {errors.curriculum?.[index]?.title && (
-//                   <p className="text-xs text-red-500">
-//                     {errors.curriculum[index].title.message}
-//                   </p>
-//                 )}
-
-//                 <textarea
-//                   rows={3}
-//                   {...register(`curriculum.${index}.description`)}
-//                   placeholder="Module description"
-//                   className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//                 />
-
-//                 <input
-//                   {...register(`curriculum.${index}.topics`)}
-//                   placeholder="Topics separated by commas"
-//                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//                   onChange={(event) => {
-//                     const value = event.target.value;
-
-//                     event.target.value = value;
-//                   }}
-//                 />
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-
-//         <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-//           For topics, enter comma-separated values such as: React, Redux, API
-//           Integration.
-//         </p>
-//       </section>
-
-//       {/* Prerequisites */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               Prerequisites
-//             </h2>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() => appendPrerequisite("")}
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add
-//           </button>
-//         </div>
-
-//         <div className="space-y-3">
-//           {prerequisiteFields.map((field, index) => (
-//             <div key={field.id} className="flex gap-3">
-//               <input
-//                 {...register(`prerequisites.${index}`)}
-//                 placeholder="e.g. Basic JavaScript knowledge"
-//                 className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//               />
-
-//               <button
-//                 type="button"
-//                 onClick={() => removePrerequisite(index)}
-//                 className="rounded-lg px-3 text-red-600 hover:bg-red-50 dark:text-red-400"
-//               >
-//                 Remove
-//               </button>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* Who Should Join */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               Who Should Join
-//             </h2>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() => appendWho("")}
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add
-//           </button>
-//         </div>
-
-//         <div className="space-y-3">
-//           {whoFields.map((field, index) => (
-//             <div key={field.id} className="flex gap-3">
-//               <input
-//                 {...register(`who_should_join.${index}`)}
-//                 placeholder="e.g. Beginners"
-//                 className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//               />
-
-//               <button
-//                 type="button"
-//                 onClick={() => removeWho(index)}
-//                 className="rounded-lg px-3 text-red-600 hover:bg-red-50 dark:text-red-400"
-//               >
-//                 Remove
-//               </button>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* Course Features */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               Course Features
-//             </h2>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() => appendFeature("")}
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add
-//           </button>
-//         </div>
-
-//         <div className="space-y-3">
-//           {featureFields.map((field, index) => (
-//             <div key={field.id} className="flex gap-3">
-//               <input
-//                 {...register(`course_features.${index}`)}
-//                 placeholder="e.g. Live Projects"
-//                 className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//               />
-
-//               <button
-//                 type="button"
-//                 onClick={() => removeFeature(index)}
-//                 className="rounded-lg px-3 text-red-600 hover:bg-red-50 dark:text-red-400"
-//               >
-//                 Remove
-//               </button>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* FAQs */}
-
-//       <section className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900">
-//         <div className="mb-5 flex items-center justify-between">
-//           <div>
-//             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-//               FAQs
-//             </h2>
-//           </div>
-
-//           <button
-//             type="button"
-//             onClick={() =>
-//               appendFaq({
-//                 question: "",
-//                 answer: "",
-//               })
-//             }
-//             className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-//           >
-//             + Add FAQ
-//           </button>
-//         </div>
-
-//         <div className="space-y-5">
-//           {faqFields.map((field, index) => (
-//             <div
-//               key={field.id}
-//               className="rounded-lg border border-gray-200 p-5 dark:border-gray-700"
-//             >
-//               <div className="mb-4 flex justify-between">
-//                 <h3 className="font-medium text-gray-900 dark:text-white">
-//                   FAQ {index + 1}
-//                 </h3>
-
-//                 <button
-//                   type="button"
-//                   onClick={() => removeFaq(index)}
-//                   className="text-sm text-red-600 hover:underline dark:text-red-400"
-//                 >
-//                   Remove
-//                 </button>
-//               </div>
-
-//               <div className="space-y-4">
-//                 <input
-//                   {...register(`faqs.${index}.question`)}
-//                   placeholder="Question"
-//                   className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//                 />
-
-//                 <textarea
-//                   {...register(`faqs.${index}.answer`)}
-//                   rows={4}
-//                   placeholder="Answer"
-//                   className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm outline-none focus:border-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-white"
-//                 />
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </section>
-
-//       {/* Submit */}
-
-//       <div className="flex justify-end">
-//         <Button type="submit" disabled={submitting}>
-//           {submitting ? "Saving..." : submitText}
-//         </Button>
-//       </div>
-//     </form>
-//   );
-// }
-
 import { useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -646,25 +9,16 @@ const defaultValues = {
   course_name: "",
   category: "",
   level: "Beginner",
-
   short_description: "",
   course_description: "",
-
   duration: "",
   total_hours: "",
-
   status: "Active",
-
   learning_outcomes: [],
-
   curriculum: [],
-
   prerequisites: [],
-
   who_should_join: [],
-
   course_features: [],
-
   faqs: [],
 };
 
@@ -745,12 +99,6 @@ export default function CourseForm({
     defaultValues,
   });
 
-  /*
-    |--------------------------------------------------------------------------
-    | Learning Outcomes
-    |--------------------------------------------------------------------------
-    */
-
   const {
     fields: outcomeFields,
     append: appendOutcome,
@@ -760,26 +108,11 @@ export default function CourseForm({
     name: "learning_outcomes",
   });
 
-  /*
-    |--------------------------------------------------------------------------
-    | Curriculum
-    |--------------------------------------------------------------------------
-    */
-
   const {
     fields: curriculumFields,
     append: appendCurriculum,
     remove: removeCurriculum,
-  } = useFieldArray({
-    control,
-    name: "curriculum",
-  });
-
-  /*
-    |--------------------------------------------------------------------------
-    | Prerequisites
-    |--------------------------------------------------------------------------
-    */
+  } = useFieldArray({ control, name: "curriculum" });
 
   const {
     fields: prerequisiteFields,
@@ -790,12 +123,6 @@ export default function CourseForm({
     name: "prerequisites",
   });
 
-  /*
-    |--------------------------------------------------------------------------
-    | Who Should Join
-    |--------------------------------------------------------------------------
-    */
-
   const {
     fields: whoFields,
     append: appendWho,
@@ -804,12 +131,6 @@ export default function CourseForm({
     control,
     name: "who_should_join",
   });
-
-  /*
-    |--------------------------------------------------------------------------
-    | Course Features
-    |--------------------------------------------------------------------------
-    */
 
   const {
     fields: featureFields,
@@ -820,12 +141,6 @@ export default function CourseForm({
     name: "course_features",
   });
 
-  /*
-    |--------------------------------------------------------------------------
-    | FAQs
-    |--------------------------------------------------------------------------
-    */
-
   const {
     fields: faqFields,
     append: appendFaq,
@@ -835,12 +150,6 @@ export default function CourseForm({
     name: "faqs",
   });
 
-  /*
-    |--------------------------------------------------------------------------
-    | Load Existing Course
-    |--------------------------------------------------------------------------
-    */
-
   useEffect(() => {
     if (!initialData) {
       reset(defaultValues);
@@ -849,21 +158,13 @@ export default function CourseForm({
 
     reset({
       course_name: initialData.course_name ?? "",
-
       category: initialData.category ?? "",
-
       level: initialData.level ?? "Beginner",
-
       short_description: initialData.short_description ?? "",
-
       course_description: initialData.course_description ?? "",
-
       duration: initialData.duration ?? "",
-
       total_hours: initialData.total_hours ?? "",
-
       status: initialData.status ?? "Active",
-
       learning_outcomes: Array.isArray(initialData.learning_outcomes)
         ? initialData.learning_outcomes.map((item) => ({
             value: item ?? "",
@@ -873,9 +174,7 @@ export default function CourseForm({
       curriculum: Array.isArray(initialData.curriculum)
         ? initialData.curriculum.map((module) => ({
             title: module.title ?? "",
-
             description: module.description ?? "",
-
             topicsText: Array.isArray(module.topics)
               ? module.topics.join(", ")
               : "",
@@ -903,27 +202,15 @@ export default function CourseForm({
       faqs: Array.isArray(initialData.faqs)
         ? initialData.faqs.map((faq) => ({
             question: faq.question ?? "",
-
             answer: faq.answer ?? "",
           }))
         : [],
     });
   }, [initialData, reset]);
 
-  /*
-    |--------------------------------------------------------------------------
-    | Submit
-    |--------------------------------------------------------------------------
-    */
-
   const submit = (data) => {
     const payload = {
       ...data,
-
-      /*
-            | "44" -> 44
-            */
-
       total_hours:
         data.total_hours === "" || data.total_hours === undefined
           ? null

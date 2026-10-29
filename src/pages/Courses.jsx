@@ -30,15 +30,11 @@ export default function Courses() {
   const fetchCourses = async () => {
     try {
       setLoading(true);
-
       const response = await getCourses();
-
       const courseData = Array.isArray(response.data) ? response.data : [];
-
       dispatch(setCourses(courseData));
     } catch (error) {
       console.error("Failed to fetch courses:", error);
-
       toast.error(getApiErrorMessage(error));
     } finally {
       setLoading(false);

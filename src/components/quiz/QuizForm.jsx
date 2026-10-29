@@ -12,6 +12,10 @@
 
 // const createDefaultQuestion = () => ({
 //   question_text: "",
+
+//   // NEW: question image
+//   question_image: null,
+
 //   type: "single_select",
 //   marks: 1,
 //   explanation: "",
@@ -55,6 +59,9 @@
 //     ? data.questions.map((question) => ({
 //         question_text: question.question_text || "",
 
+//         // NEW: preserve existing image URL in edit mode
+//         question_image: question.question_image || null,
+
 //         type:
 //           question.type === "multi_select" ? "multi_select" : "single_select",
 
@@ -66,7 +73,6 @@
 //           Array.isArray(question.options) && question.options.length >= 2
 //             ? question.options.map((option) => ({
 //                 option_text: option.option_text || "",
-
 //                 is_correct: option.is_correct === true,
 //               }))
 //             : [createDefaultOption(), createDefaultOption()],
@@ -248,6 +254,20 @@
 
 //         questions: formData.questions.map((question) => ({
 //           question_text: question.question_text.trim(),
+
+//           /*
+//            * NEW:
+//            *
+//            * Keep the actual File object here when
+//            * the admin selects a new image.
+//            *
+//            * In edit mode this can also contain the
+//            * existing image URL.
+//            *
+//            * quizApi.js will decide whether it is
+//            * a File and append it to FormData.
+//            */
+//           question_image: question.question_image || null,
 
 //           type: question.type,
 
@@ -740,10 +760,7 @@ const createDefaultOption = () => ({
 
 const createDefaultQuestion = () => ({
   question_text: "",
-
-  // NEW: question image
   question_image: null,
-
   type: "single_select",
   marks: 1,
   explanation: "",
@@ -752,29 +769,17 @@ const createDefaultQuestion = () => ({
 
 const defaultValues = {
   batch_id: undefined,
-
   title: "",
-
   description: "",
-
   duration_minutes: 30,
-
   passing_marks: 0,
-
-  attempts_allowed: 1,
-
+  attempts_allowed: 5,
   shuffle_questions: false,
-
   shuffle_options: false,
-
   auto_submit: true,
-
   show_result: true,
-
   show_correct_answers: false,
-
   status: "draft",
-
   questions: [createDefaultQuestion()],
 };
 
@@ -785,9 +790,20 @@ const normalizeInitialData = (data) => {
 
   const normalizedQuestions = Array.isArray(data.questions)
     ? data.questions.map((question) => ({
+        /*
+        |--------------------------------------------------------------------------
+        | IMPORTANT: Preserve database question ID
+        |--------------------------------------------------------------------------
+        */
+
+        ...(question.id
+          ? {
+              id: Number(question.id),
+            }
+          : {}),
+
         question_text: question.question_text || "",
 
-        // NEW: preserve existing image URL in edit mode
         question_image: question.question_image || null,
 
         type:
@@ -800,7 +816,20 @@ const normalizeInitialData = (data) => {
         options:
           Array.isArray(question.options) && question.options.length >= 2
             ? question.options.map((option) => ({
+                /*
+                |--------------------------------------------------------------------------
+                | IMPORTANT: Preserve database option ID
+                |--------------------------------------------------------------------------
+                */
+
+                ...(option.id
+                  ? {
+                      id: Number(option.id),
+                    }
+                  : {}),
+
                 option_text: option.option_text || "",
+
                 is_correct: option.is_correct === true,
               }))
             : [createDefaultOption(), createDefaultOption()],
@@ -812,29 +841,17 @@ const normalizeInitialData = (data) => {
       data.batch_id !== null && data.batch_id !== undefined
         ? Number(data.batch_id)
         : undefined,
-
     title: data.title || "",
-
     description: data.description || "",
-
     duration_minutes: Number(data.duration_minutes) || 30,
-
     passing_marks: Number(data.passing_marks) || 0,
-
-    attempts_allowed: Number(data.attempts_allowed) || 1,
-
+    attempts_allowed: Number(data.attempts_allowed) || 5,
     shuffle_questions: data.shuffle_questions === true,
-
     shuffle_options: data.shuffle_options === true,
-
     auto_submit: data.auto_submit !== false,
-
     show_result: data.show_result !== false,
-
     show_correct_answers: data.show_correct_answers === true,
-
     status: data.status || "draft",
-
     questions: normalizedQuestions,
   };
 };
@@ -857,13 +874,9 @@ function QuizForm({
     formState: { errors, isSubmitting, isDirty },
   } = useForm({
     resolver: zodResolver(quizSchema),
-
     defaultValues: normalizeInitialData(initialData),
-
     mode: "onSubmit",
-
     reValidateMode: "onChange",
-
     shouldFocusError: true,
   });
 
@@ -877,11 +890,8 @@ function QuizForm({
   });
 
   const questions = watch("questions") || [];
-
   const showResult = watch("show_result");
-
   const showCorrectAnswers = watch("show_correct_answers");
-
   const passingMarks = watch("passing_marks");
 
   /*
@@ -904,7 +914,6 @@ function QuizForm({
 
   const totalMarks = questions.reduce((total, question) => {
     const marks = Number(question?.marks || 0);
-
     return total + (Number.isFinite(marks) ? marks : 0);
   }, 0);
 
@@ -917,10 +926,8 @@ function QuizForm({
   const handleAddQuestion = () => {
     if (questionFields.length >= 200) {
       toast.error("Maximum 200 questions are allowed.");
-
       return;
     }
-
     appendQuestion(createDefaultQuestion());
   };
 
@@ -933,10 +940,8 @@ function QuizForm({
   const handleRemoveQuestion = (questionIndex) => {
     if (questionFields.length <= 1) {
       toast.error("At least one question is required.");
-
       return;
     }
-
     removeQuestion(questionIndex);
   };
 
@@ -949,11 +954,10 @@ function QuizForm({
   const submitForm = async (formData) => {
     try {
       /*
-       * Calculate total marks again from the final
-       * validated form data.
-       *
-       * Do not trust a total_marks field from the UI.
-       */
+      |--------------------------------------------------------------------------
+      | Calculate total marks again
+      |--------------------------------------------------------------------------
+      */
 
       const calculatedTotalMarks = formData.questions.reduce(
         (total, question) => total + question.marks,
@@ -961,62 +965,67 @@ function QuizForm({
       );
 
       /*
-       * Backend expects clean data.
-       */
+      |--------------------------------------------------------------------------
+      | Backend payload
+      |--------------------------------------------------------------------------
+      */
 
       const payload = {
         ...formData,
-
         batch_id: Number(formData.batch_id),
-
         duration_minutes: Number(formData.duration_minutes),
-
         passing_marks: Number(formData.passing_marks),
-
         attempts_allowed: Number(formData.attempts_allowed),
 
         /*
-         * Do not send total_marks as user input.
-         * Backend calculates it.
-         */
+        |--------------------------------------------------------------------------
+        | Do not send total_marks
+        |--------------------------------------------------------------------------
+        */
 
         questions: formData.questions.map((question) => ({
-          question_text: question.question_text.trim(),
-
           /*
-           * NEW:
-           *
-           * Keep the actual File object here when
-           * the admin selects a new image.
-           *
-           * In edit mode this can also contain the
-           * existing image URL.
-           *
-           * quizApi.js will decide whether it is
-           * a File and append it to FormData.
-           */
+            |--------------------------------------------------------------------------
+            | IMPORTANT:
+            | Preserve existing question ID
+            |--------------------------------------------------------------------------
+            */
+
+          ...(question.id
+            ? {
+                id: Number(question.id),
+              }
+            : {}),
+
+          question_text: question.question_text.trim(),
           question_image: question.question_image || null,
-
           type: question.type,
-
           marks: Number(question.marks),
-
           explanation: question.explanation?.trim() || null,
-
           options: question.options.map((option) => ({
-            option_text: option.option_text.trim(),
+            /*
+                |--------------------------------------------------------------------------
+                | IMPORTANT:
+                | Preserve existing option ID
+                |--------------------------------------------------------------------------
+                */
 
+            ...(option.id
+              ? {
+                  id: Number(option.id),
+                }
+              : {}),
+
+            option_text: option.option_text.trim(),
             is_correct: option.is_correct === true,
           })),
         })),
       };
 
       console.log("Final Quiz Payload:", payload);
-
       await onSubmit(payload, calculatedTotalMarks);
     } catch (error) {
       console.error("Quiz form submit error:", error);
-
       toast.error(
         error?.response?.data?.message ||
           error?.message ||
@@ -1033,7 +1042,6 @@ function QuizForm({
 
   const handleValidationError = (validationErrors) => {
     console.error("Quiz validation errors:", validationErrors);
-
     toast.error("Please fix the highlighted errors before submitting.");
   };
 
@@ -1211,7 +1219,7 @@ function QuizForm({
 
             <input
               type="number"
-              min="1"
+              min="5"
               max="100"
               {...register("attempts_allowed", {
                 setValueAs: (value) =>

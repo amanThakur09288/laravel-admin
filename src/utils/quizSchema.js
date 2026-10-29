@@ -1,6 +1,77 @@
 // import { z } from "zod";
 
-// const optionSchema = z.object({
+// export const defaultQuizOption = {
+//   option_text: "",
+//   is_correct: false,
+// };
+
+// export const defaultQuizQuestion = {
+//   question_text: "",
+//   question_image: null,
+//   type: "single_select",
+//   marks: 1,
+//   explanation: "",
+
+//   options: [
+//     {
+//       option_text: "",
+//       is_correct: false,
+//     },
+//     {
+//       option_text: "",
+//       is_correct: false,
+//     },
+//   ],
+// };
+
+// /*
+// |--------------------------------------------------------------------------
+// | Default Quiz Values
+// |--------------------------------------------------------------------------
+// */
+
+// export const defaultQuizValues = {
+//   batch_id: undefined,
+//   title: "",
+//   description: "",
+//   duration_minutes: 30,
+//   passing_marks: 0,
+//   attempts_allowed: 1,
+//   shuffle_questions: false,
+//   shuffle_options: false,
+//   auto_submit: true,
+//   show_result: true,
+//   show_correct_answers: false,
+//   status: "draft",
+//   questions: [
+//     {
+//       question_text: "",
+//       question_image: null,
+//       type: "single_select",
+//       marks: 1,
+//       explanation: "",
+
+//       options: [
+//         {
+//           option_text: "",
+//           is_correct: false,
+//         },
+//         {
+//           option_text: "",
+//           is_correct: false,
+//         },
+//       ],
+//     },
+//   ],
+// };
+
+// /*
+// |--------------------------------------------------------------------------
+// | Option Schema
+// |--------------------------------------------------------------------------
+// */
+
+// export const optionSchema = z.object({
 //   option_text: z
 //     .string()
 //     .trim()
@@ -8,11 +79,17 @@
 //     .max(1000, "Option cannot exceed 1000 characters."),
 
 //   is_correct: z.boolean({
-//     error: "Please select whether this option is correct.",
+//     error: "Correct option value must be true or false.",
 //   }),
 // });
 
-// const questionSchema = z
+// /*
+// |--------------------------------------------------------------------------
+// | Question Schema
+// |--------------------------------------------------------------------------
+// */
+
+// export const questionSchema = z
 //   .object({
 //     question_text: z
 //       .string()
@@ -20,9 +97,9 @@
 //       .min(1, "Question is required.")
 //       .max(5000, "Question cannot exceed 5000 characters."),
 
-//     type: z.enum(["single_select", "multi_select"], {
-//       error: "Please select a valid question type.",
-//     }),
+//     question_image: z.any().nullable().optional(),
+
+//     type: z.enum(["single_select", "multi_select"]),
 
 //     marks: z
 //       .number({
@@ -36,8 +113,7 @@
 //     explanation: z
 //       .string()
 //       .trim()
-//       .max(5000, "Explanation cannot exceed 5000 characters.")
-//       .optional(),
+//       .max(5000, "Explanation cannot exceed 5000 characters."),
 
 //     options: z
 //       .array(optionSchema)
@@ -47,53 +123,56 @@
 //   .superRefine((question, ctx) => {
 //     /*
 //     |--------------------------------------------------------------------------
-//     | Correct answer validation
+//     | Find correct options
 //     |--------------------------------------------------------------------------
 //     */
 
 //     const correctOptions = question.options.filter(
-//       (option) => option.is_correct === true
+//       (option) => option.is_correct === true,
 //     );
 
-//     if (question.type === "single_select") {
-//       if (correctOptions.length !== 1) {
-//         ctx.addIssue({
-//           code: "custom",
-//           path: ["options"],
-//           message:
-//             "Single Select must have exactly one correct option.",
-//         });
-//       }
-//     }
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Single Select
+//     |--------------------------------------------------------------------------
+//     */
 
-//     if (question.type === "multi_select") {
-//       if (correctOptions.length < 2) {
-//         ctx.addIssue({
-//           code: "custom",
-//           path: ["options"],
-//           message:
-//             "Multi Select must have at least two correct options.",
-//         });
-//       }
+//     if (question.type === "single_select" && correctOptions.length !== 1) {
+//       ctx.addIssue({
+//         code: "custom",
+//         path: ["options"],
+//         message: "Single Select must have exactly one correct option.",
+//       });
 //     }
 
 //     /*
 //     |--------------------------------------------------------------------------
-//     | Duplicate option validation
+//     | Multi Select
 //     |--------------------------------------------------------------------------
 //     */
 
-//     const normalizedOptions = question.options.map((option) =>
-//       option.option_text.trim().toLowerCase()
+//     if (question.type === "multi_select" && correctOptions.length < 2) {
+//       ctx.addIssue({
+//         code: "custom",
+//         path: ["options"],
+//         message: "Multi Select must have at least two correct options.",
+//       });
+//     }
+
+//     /*
+//     |--------------------------------------------------------------------------
+//     | Duplicate Options
+//     |--------------------------------------------------------------------------
+//     */
+
+//     const optionNames = question.options.map((option) =>
+//       option.option_text.trim().toLowerCase(),
 //     );
 
 //     const duplicateIndexes = [];
 
-//     normalizedOptions.forEach((value, index) => {
-//       if (
-//         value !== "" &&
-//         normalizedOptions.indexOf(value) !== index
-//       ) {
+//     optionNames.forEach((optionName, index) => {
+//       if (optionName && optionNames.indexOf(optionName) !== index) {
 //         duplicateIndexes.push(index);
 //       }
 //     });
@@ -106,6 +185,12 @@
 //       });
 //     });
 //   });
+
+// /*
+// |--------------------------------------------------------------------------
+// | Quiz Schema
+// |--------------------------------------------------------------------------
+// */
 
 // export const quizSchema = z
 //   .object({
@@ -125,8 +210,7 @@
 //     description: z
 //       .string()
 //       .trim()
-//       .max(5000, "Description cannot exceed 5000 characters.")
-//       .optional(),
+//       .max(5000, "Description cannot exceed 5000 characters."),
 
 //     duration_minutes: z
 //       .number({
@@ -164,9 +248,7 @@
 
 //     show_correct_answers: z.boolean(),
 
-//     status: z.enum(["draft", "published", "closed"], {
-//       error: "Please select a valid status.",
-//     }),
+//     status: z.enum(["draft", "published", "closed"]),
 
 //     questions: z
 //       .array(questionSchema)
@@ -174,22 +256,10 @@
 //       .max(200, "Maximum 200 questions are allowed."),
 //   })
 //   .superRefine((quiz, ctx) => {
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Calculate total marks
-//     |--------------------------------------------------------------------------
-//     */
-
 //     const totalMarks = quiz.questions.reduce(
 //       (total, question) => total + question.marks,
-//       0
+//       0,
 //     );
-
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Passing marks cannot exceed total marks
-//     |--------------------------------------------------------------------------
-//     */
 
 //     if (quiz.passing_marks > totalMarks) {
 //       ctx.addIssue({
@@ -199,32 +269,33 @@
 //       });
 //     }
 
-//     /*
-//     |--------------------------------------------------------------------------
-//     | Correct answers cannot be shown when result is hidden
-//     |--------------------------------------------------------------------------
-//     */
-
-//     if (
-//       quiz.show_correct_answers === true &&
-//       quiz.show_result === false
-//     ) {
+//     if (quiz.show_correct_answers === true && quiz.show_result === false) {
 //       ctx.addIssue({
 //         code: "custom",
 //         path: ["show_correct_answers"],
-//         message:
-//           "Correct answers cannot be shown when the result is hidden.",
+//         message: "Correct answers cannot be shown when the result is hidden.",
 //       });
 //     }
 //   });
 
-// export { optionSchema, questionSchema };
 import { z } from "zod";
+
+/*
+|--------------------------------------------------------------------------
+| Default Option
+|--------------------------------------------------------------------------
+*/
 
 export const defaultQuizOption = {
   option_text: "",
   is_correct: false,
 };
+
+/*
+|--------------------------------------------------------------------------
+| Default Question
+|--------------------------------------------------------------------------
+*/
 
 export const defaultQuizQuestion = {
   question_text: "",
@@ -253,17 +324,29 @@ export const defaultQuizQuestion = {
 
 export const defaultQuizValues = {
   batch_id: undefined,
+
   title: "",
+
   description: "",
+
   duration_minutes: 30,
+
   passing_marks: 0,
+
   attempts_allowed: 1,
+
   shuffle_questions: false,
+
   shuffle_options: false,
+
   auto_submit: true,
+
   show_result: true,
+
   show_correct_answers: false,
+
   status: "draft",
+
   questions: [
     {
       question_text: "",
@@ -290,9 +373,19 @@ export const defaultQuizValues = {
 |--------------------------------------------------------------------------
 | Option Schema
 |--------------------------------------------------------------------------
+|
+| IMPORTANT:
+| id is optional because:
+|
+| - New option       -> no id
+| - Existing option  -> has database id
+|
+|--------------------------------------------------------------------------
 */
 
 export const optionSchema = z.object({
+  id: z.number().int().positive().optional(),
+
   option_text: z
     .string()
     .trim()
@@ -308,10 +401,20 @@ export const optionSchema = z.object({
 |--------------------------------------------------------------------------
 | Question Schema
 |--------------------------------------------------------------------------
+|
+| IMPORTANT:
+| id is optional because:
+|
+| - New question       -> no id
+| - Existing question  -> has database id
+|
+|--------------------------------------------------------------------------
 */
 
 export const questionSchema = z
   .object({
+    id: z.number().int().positive().optional(),
+
     question_text: z
       .string()
       .trim()
@@ -477,10 +580,22 @@ export const quizSchema = z
       .max(200, "Maximum 200 questions are allowed."),
   })
   .superRefine((quiz, ctx) => {
+    /*
+    |--------------------------------------------------------------------------
+    | Calculate total marks
+    |--------------------------------------------------------------------------
+    */
+
     const totalMarks = quiz.questions.reduce(
       (total, question) => total + question.marks,
       0,
     );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Passing marks cannot exceed total marks
+    |--------------------------------------------------------------------------
+    */
 
     if (quiz.passing_marks > totalMarks) {
       ctx.addIssue({
@@ -489,6 +604,12 @@ export const quizSchema = z
         message: `Passing marks cannot exceed total marks (${totalMarks}).`,
       });
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Correct answers require result
+    |--------------------------------------------------------------------------
+    */
 
     if (quiz.show_correct_answers === true && quiz.show_result === false) {
       ctx.addIssue({
