@@ -3,54 +3,69 @@
 // import { clearUser } from "../redux/slices/authSlice";
 // import { navigateToLogin } from "../utils/navigation";
 
-// const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_BASE_URL,
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/+$/, "");
 
+// if (!API_BASE_URL) {
+//   throw new Error("VITE_API_BASE_URL is missing from your environment.");
+// }
+
+// const api = axios.create({
+//   baseURL: API_BASE_URL,
 //   withCredentials: true,
 //   withXSRFToken: true,
-
 //   xsrfCookieName: "XSRF-TOKEN",
 //   xsrfHeaderName: "X-XSRF-TOKEN",
-
 //   headers: {
 //     Accept: "application/json",
-//     "Content-Type": "application/json",
 //   },
 // });
 
-// // Request Interceptor
+// // Request interceptor
 // api.interceptors.request.use(
 //   (config) => {
-//     console.log("API Request:", config.method?.toUpperCase(), config.url);
+//     // Let Axios set the multipart boundary automatically.
+//     if (
+//       typeof FormData !== "undefined" &&
+//       config.data instanceof FormData
+//     ) {
+//       config.headers.delete?.("Content-Type");
+//       if (config.headers["Content-Type"]) {
+//         delete config.headers["Content-Type"];
+//       }
+//     }
+
+//     console.log(
+//       "API Request:",
+//       config.method?.toUpperCase(),
+//       config.baseURL,
+//       config.url,
+//     );
 
 //     return config;
 //   },
-//   (error) => {
-//     return Promise.reject(error);
-//   },
+//   (error) => Promise.reject(error),
 // );
 
-// // Response Interceptor
+// // Response interceptor
 // api.interceptors.response.use(
 //   (response) => {
-//     console.log("API Response:", response.status);
-
+//     console.log("API Response:", response.status, response.config.url);
 //     return response;
 //   },
-
 //   (error) => {
-//     console.error("API Error:", error.response?.data);
+//     console.error("API Error:", {
+//       url: error.config?.url,
+//       status: error.response?.status,
+//       data: error.response?.data,
+//       message: error.message,
+//     });
 
-//     if (error.response?.status === 401) {
-//       console.log("Session expired. Logging out...");
-
-//       // Clear Redux authentication
+//     if (
+//       error.response?.status === 401 &&
+//       window.location.pathname !== "/login"
+//     ) {
 //       store.dispatch(clearUser());
-
-//       // React Router navigation without page refresh
-//       if (window.location.pathname !== "/login") {
-//         navigateToLogin();
-//       }
+//       navigateToLogin();
 //     }
 
 //     return Promise.reject(error);
@@ -60,82 +75,45 @@
 // export default api;
 
 import axios from "axios";
-import { store } from "../redux/store";
-import { clearUser } from "../redux/slices/authSlice";
-import { navigateToLogin } from "../utils/navigation";
+
+const apiBaseURL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-
+  baseURL: apiBaseURL,
+  timeout: 15000,
   withCredentials: true,
   withXSRFToken: true,
-
-  xsrfCookieName: "XSRF-TOKEN",
-  xsrfHeaderName: "X-XSRF-TOKEN",
-
   headers: {
     Accept: "application/json",
+    "Content-Type": "application/json",
+    "X-Requested-With": "XMLHttpRequest",
   },
 });
 
-// Request Interceptor
-api.interceptors.request.use(
-  (config) => {
-    /*
-    |--------------------------------------------------------------------------
-    | FormData
-    |--------------------------------------------------------------------------
-    |
-    | Do NOT manually set Content-Type for FormData.
-    | Axios will automatically set:
-    |
-    | multipart/form-data; boundary=...
-    |
-    */
+export const getCsrfCookie = async () => {
+  const apiOrigin = new URL(apiBaseURL).origin;
 
-    if (config.data instanceof FormData) {
-      delete config.headers["Content-Type"];
-    } else {
+  return axios.get(`${apiOrigin}/sanctum/csrf-cookie`, {
+    withCredentials: true,
+    withXSRFToken: true,
+    headers: {
+      Accept: "application/json",
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  });
+};
 
-    /*
-    |--------------------------------------------------------------------------
-    | Normal JSON requests
-    |--------------------------------------------------------------------------
-    */
-      config.headers["Content-Type"] = "application/json";
-    }
-
-    console.log("API Request:", config.method?.toUpperCase(), config.url);
-
-    return config;
-  },
-
-  (error) => {
-    return Promise.reject(error);
-  },
-);
-
-// Response Interceptor
 api.interceptors.response.use(
-  (response) => {
-    console.log("API Response:", response.status);
-
-    return response;
-  },
-
+  (response) => response,
   (error) => {
-    console.error("API Error:", error.response?.data);
-
-    if (error.response?.status === 401) {
-      console.log("Session expired. Logging out...");
-
-      // Clear Redux authentication
-      store.dispatch(clearUser());
-
-      // React Router navigation without page refresh
-      if (window.location.pathname !== "/login") {
-        navigateToLogin();
-      }
+    if (error.response) {
+      console.error("API Error:", {
+        status: error.response.status,
+        url: error.config?.url,
+        data: error.response.data,
+      });
+    } else {
+      console.error("Network/API Error:", error.message);
     }
 
     return Promise.reject(error);

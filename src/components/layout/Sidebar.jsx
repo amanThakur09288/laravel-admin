@@ -1,59 +1,172 @@
+// import { NavLink } from "react-router-dom";
+// import LogoutButton from "../common/LogoutButton";
+
+// export default function Sidebar({ isOpen, onClose }) {
+//   const links = [
+//     {
+//       name: "Dashboard",
+//       path: "/",
+//       icon: "📊",
+//     },
+//     {
+//       name: "Products",
+//       path: "/products",
+//       icon: "📦",
+//     },
+//     {
+//       name: "Upcoming Batches",
+//       path: "/batches",
+//       icon: "📅",
+//     },
+//     {
+//       name: "Courses",
+//       path: "/courses",
+//       icon: "📚",
+//     },
+//     {
+//       name: "Video Sections",
+//       path: "/video-sections",
+//       icon: "🎬",
+//     },
+//     {
+//       name: "Quizzes",
+//       path: "/quizzes",
+//       icon: "📝",
+//     },
+//     {
+//       name: "Quiz Results",
+//       path: "/quiz-results",
+//       icon: "📋",
+//     },
+//     {
+//       name: "Services",
+//       path: "/services",
+//       icon: "🛠️",
+//     },
+//     {
+//       name: "Contact Messages",
+//       path: "/contact-messages",
+//       icon: "✉️",
+//     },
+//   ];
+
+//   return (
+//     <>
+//       {/* Mobile Overlay */}
+
+//       {isOpen && (
+//         <div
+//           onClick={onClose}
+//           className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+//         />
+//       )}
+
+//       {/* Sidebar */}
+
+//       <aside
+//         className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col transform border-r border-gray-200 bg-white transition-transform dark:border-gray-800 dark:bg-gray-900 lg:translate-x-0 ${
+//           isOpen ? "translate-x-0" : "-translate-x-full"
+//         }`}
+//       >
+//         {/* Header */}
+
+//         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 px-6 dark:border-gray-800">
+//           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+//             AdminPanel
+//           </h1>
+
+//           <button
+//             type="button"
+//             onClick={onClose}
+//             className="text-2xl text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white lg:hidden"
+//           >
+//             ×
+//           </button>
+//         </div>
+
+//         {/* Navigation */}
+
+//         <nav className="flex-1 overflow-y-auto p-4">
+//           <div className="space-y-2">
+//             {links.map((link) => (
+//               <NavLink
+//                 key={link.path}
+//                 to={link.path}
+//                 onClick={onClose}
+//                 className={({ isActive }) =>
+//                   `flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
+//                     isActive
+//                       ? "bg-blue-600 text-white"
+//                       : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+//                   }`
+//                 }
+//               >
+//                 <span className="w-5 text-center">{link.icon}</span>
+
+//                 <span>{link.name}</span>
+//               </NavLink>
+//             ))}
+//           </div>
+//         </nav>
+
+//         {/* Logout */}
+
+//         <div className="shrink-0 border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
+//           <LogoutButton />
+//         </div>
+//       </aside>
+//     </>
+//   );
+// }
+
 import { NavLink } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import LogoutButton from "../common/LogoutButton";
 
 export default function Sidebar({ isOpen, onClose }) {
+  const user = useSelector((state) => state.auth.user);
+  const isMainAdmin = user?.role === "admin";
+
   const links = [
-    {
-      name: "Dashboard",
-      path: "/",
-      icon: "📊",
-    },
-    {
-      name: "Products",
-      path: "/products",
-      icon: "📦",
-    },
-    {
-      name: "Upcoming Batches",
-      path: "/batches",
-      icon: "📅",
-    },
-    {
-      name: "Courses",
-      path: "/courses",
-      icon: "📚",
-    },
-    {
-      name: "Video Sections",
-      path: "/video-sections",
-      icon: "🎬",
-    },
-    {
-      name: "Quizzes",
-      path: "/quizzes",
-      icon: "📝",
-    },
-    {
-      name: "Quiz Results",
-      path: "/quiz-results",
-      icon: "📋",
-    },
-    {
-      name: "Services",
-      path: "/services",
-      icon: "🛠️",
-    },
-    {
-      name: "Contact Messages",
-      path: "/contact-messages",
-      icon: "✉️",
-    },
+    { name: "Dashboard", path: "/", icon: "📊" },
+
+    ...(isMainAdmin
+      ? [
+          {
+            name: "Teacher Management",
+            path: "/admin-management",
+            icon: "👥",
+          },
+          {
+            name: "Student Management",
+            path: "/students",
+            icon: "🎓",
+          },
+          { name: "Products", path: "/products", icon: "📦" },
+          { name: "Services", path: "/services", icon: "🛠️" },
+        ]
+      : []),
+
+    { name: "Upcoming Batches", path: "/batches", icon: "📅" },
+    { name: "Courses", path: "/courses", icon: "📚" },
+    { name: "Video Sections", path: "/video-sections", icon: "🎬" },
+    { name: "Quizzes", path: "/quizzes", icon: "📝" },
+    { name: "Quiz Results", path: "/quiz-results", icon: "📋" },
+
+    ...(isMainAdmin
+      ? [
+          {
+            name: "Contact Messages",
+            path: "/contact-messages",
+            icon: "✉️",
+          },
+        ]
+      : []),
   ];
 
   return (
     <>
-      {/* Mobile Overlay */}
-
       {isOpen && (
         <div
           onClick={onClose}
@@ -61,15 +174,11 @@ export default function Sidebar({ isOpen, onClose }) {
         />
       )}
 
-      {/* Sidebar */}
-
       <aside
         className={`fixed left-0 top-0 z-40 flex h-screen w-64 flex-col transform border-r border-gray-200 bg-white transition-transform dark:border-gray-800 dark:bg-gray-900 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Header */}
-
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-200 px-6 dark:border-gray-800">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             AdminPanel
@@ -78,13 +187,12 @@ export default function Sidebar({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
+            aria-label="Close navigation"
             className="text-2xl text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white lg:hidden"
           >
             ×
           </button>
         </div>
-
-        {/* Navigation */}
 
         <nav className="flex-1 overflow-y-auto p-4">
           <div className="space-y-2">
@@ -93,6 +201,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 key={link.path}
                 to={link.path}
                 onClick={onClose}
+                end={link.path === "/"}
                 className={({ isActive }) =>
                   `flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition ${
                     isActive
@@ -102,14 +211,11 @@ export default function Sidebar({ isOpen, onClose }) {
                 }
               >
                 <span className="w-5 text-center">{link.icon}</span>
-
                 <span>{link.name}</span>
               </NavLink>
             ))}
           </div>
         </nav>
-
-        {/* Logout */}
 
         <div className="shrink-0 border-t border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-900">
           <LogoutButton />
