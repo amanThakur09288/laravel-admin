@@ -240,63 +240,52 @@ import api from "./axios";
 const buildQuizFormData = (data) => {
   const formData = new FormData();
 
-  formData.append("batch_id", String(data.batch_id));
-
+  // formData.append("batch_id", String(data.batch_id));
+  // Send batch_id only when a batch is selected.
+  if (
+    data.batch_id !== null &&
+    data.batch_id !== undefined &&
+    data.batch_id !== ""
+  ) {
+    formData.append("batch_id", String(data.batch_id));
+  }
+  formData.append("course_id", data.course_id ? String(data.course_id) : "");
+  formData.append(
+    "course_section_id",
+    data.course_section_id ? String(data.course_section_id) : "",
+  );
+  formData.append(
+    "course_lesson_id",
+    data.course_lesson_id ? String(data.course_lesson_id) : "",
+  );
   formData.append("title", data.title || "");
-
   formData.append("description", data.description || "");
-
   formData.append("duration_minutes", String(data.duration_minutes));
-
   formData.append("passing_marks", String(data.passing_marks));
-
   formData.append("attempts_allowed", String(data.attempts_allowed));
-
   formData.append("shuffle_questions", data.shuffle_questions ? "1" : "0");
-
   formData.append("shuffle_options", data.shuffle_options ? "1" : "0");
-
   formData.append("auto_submit", data.auto_submit ? "1" : "0");
-
   formData.append("show_result", data.show_result ? "1" : "0");
-
   formData.append(
     "show_correct_answers",
     data.show_correct_answers ? "1" : "0",
   );
 
   formData.append("status", data.status || "draft");
-
-  /*
-  |--------------------------------------------------------------------------
-  | Questions
-  |--------------------------------------------------------------------------
-  */
-
   data.questions.forEach((question, questionIndex) => {
-    /*
-      |--------------------------------------------------------------------------
-      | IMPORTANT:
-      | Existing question ID
-      |--------------------------------------------------------------------------
-      */
-
     if (question.id) {
       formData.append(`questions[${questionIndex}][id]`, String(question.id));
     }
-
     formData.append(
       `questions[${questionIndex}][question_text]`,
       question.question_text || "",
     );
-
     formData.append(`questions[${questionIndex}][type]`, question.type);
-
     formData.append(
       `questions[${questionIndex}][marks]`,
       String(question.marks),
     );
-
     formData.append(
       `questions[${questionIndex}][explanation]`,
       question.explanation || "",
@@ -324,20 +313,7 @@ const buildQuizFormData = (data) => {
       );
     }
 
-    /*
-      |--------------------------------------------------------------------------
-      | Options
-      |--------------------------------------------------------------------------
-      */
-
     question.options.forEach((option, optionIndex) => {
-      /*
-          |--------------------------------------------------------------------------
-          | IMPORTANT:
-          | Existing option ID
-          |--------------------------------------------------------------------------
-          */
-
       if (option.id) {
         formData.append(
           `questions[${questionIndex}][options][${optionIndex}][id]`,
@@ -360,72 +336,22 @@ const buildQuizFormData = (data) => {
   return formData;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Get All Quizzes
-|--------------------------------------------------------------------------
-*/
-
 export const getQuizzes = async () => {
   const response = await api.get("/quizzes");
-
   return response.data;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Get Single Quiz
-|--------------------------------------------------------------------------
-*/
 
 export const getQuiz = async (id) => {
   const response = await api.get(`/quizzes/${id}`);
-
   return response.data;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Create Quiz
-|--------------------------------------------------------------------------
-*/
 
 export const createQuiz = async (data) => {
   const formData = buildQuizFormData(data);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Debug image
-  |--------------------------------------------------------------------------
-  */
-
   const imageEntry = formData.get("questions[0][question_image]");
-
-  console.log("Quiz image being sent:", imageEntry);
-
-  console.log("Is actual File:", imageEntry instanceof File);
-
-  /*
-  |--------------------------------------------------------------------------
-  | Debug IDs
-  |--------------------------------------------------------------------------
-  */
-
-  console.log(
-    "Creating quiz with question IDs:",
-    data.questions.map((question) => question.id),
-  );
-
   const response = await api.post("/quizzes", formData);
-
   return response.data;
 };
-
-/*
-|--------------------------------------------------------------------------
-| Update Quiz
-|--------------------------------------------------------------------------
-*/
 
 export const updateQuiz = async (id, data) => {
   const formData = buildQuizFormData(data);
@@ -442,40 +368,11 @@ export const updateQuiz = async (id, data) => {
   */
 
   formData.append("_method", "PUT");
-
-  /*
-  |--------------------------------------------------------------------------
-  | Debug IDs
-  |--------------------------------------------------------------------------
-  */
-
-  console.log("Updating quiz:", id);
-
-  console.log(
-    "Question IDs:",
-    data.questions.map((question) => question.id),
-  );
-
-  console.log(
-    "Option IDs:",
-    data.questions.map((question) =>
-      question.options.map((option) => option.id),
-    ),
-  );
-
   const response = await api.post(`/quizzes/${id}`, formData);
-
   return response.data;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Delete Quiz
-|--------------------------------------------------------------------------
-*/
-
 export const deleteQuiz = async (id) => {
   const response = await api.delete(`/quizzes/${id}`);
-
   return response.data;
 };

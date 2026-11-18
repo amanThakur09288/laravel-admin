@@ -274,9 +274,7 @@ export default function Login() {
       const user = response?.user || response?.data?.user;
 
       if (!user || !["admin", "teacher"].includes(user.role)) {
-        throw new Error(
-          "You are not authorized to access the admin panel.",
-        );
+        throw new Error("You are not authorized to access the admin panel.");
       }
 
       if (user.is_active === false) {
